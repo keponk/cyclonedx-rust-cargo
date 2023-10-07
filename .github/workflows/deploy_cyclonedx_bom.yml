@@ -46,23 +46,39 @@ jobs:
           git push --follow-tags
 
   build-prod:
-    # Set the job to run on the platform specified by the matrix below
-    runs-on: ${{ matrix.runner }}
-    needs: deploy
-    # Define the build matrix for cross-compilation
+    name: Build prod - ${{ matrix.platform.release_for }}
     strategy:
-      fail-fast: false
       matrix:
-        include:
-          - name: linux-amd64
-            runner: ubuntu-latest
-            target: x86_64-unknown-linux-gnu
-          - name: win-amd64
-            runner: windows-latest
+        platform:
+          - release_for: Linux-x86_64
+            os: ubuntu-20.04
+            target: x86_64-unknown-linux-musl
+            bin: cargo-cyclonedx
+            name: cargo-cyclonedx-Linux-x86_64-musl.tar.gz
+
+          - release_for: Windows-x86_64
+            os: windows-latest
             target: x86_64-pc-windows-msvc
-          - name: macos-amd64
-            runner: macos-latest
+            bin: cargo-cyclonedx.exe
+            name: cargo-cyclonedx-Windows-x86_64.zip
+            command: both
+
+          - release_for: macOS-aarch64
+            os: macOS-latest
+            target: aarch64-apple-darwin
+            bin: cargo-cyclonedx
+            name: cargo-cyclonedx-Darwin-aarch64.tar.gz
+            skip_tests: true
+
+          - release_for: macOS-x86_64
+            os: macOS-latest
             target: x86_64-apple-darwin
+            bin: cargo-cyclonedx
+            name: cargo-cyclonedx-Darwin-x86_64.tar.gz
+            command: both
+    runs-on: ${{ matrix.platform.os }}
+    needs: deploy
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -73,34 +89,35 @@ jobs:
           echo "${{ needs.deploy.outputs.TAG_NAME }}"
           git checkout ${{ needs.deploy.outputs.TAG_NAME }}
           git status
-      - name: Install Rust
-        uses: dtolnay/rust-toolchain@stable
-        with:
-          targets: "${{ matrix.target }}"
       - name: Setup Cache
         uses: Swatinem/rust-cache@v2
-      - name: Build Prod Binary
-        run: cargo build --verbose --locked --release --target ${{ matrix.target }}
-      - name: Zip artifacts
+      - name: Install musl-tools on Linux
+        run: sudo apt-get update --yes && sudo apt-get install --yes musl-tools
+        if: contains(matrix.platform.name, 'musl')
+      - name: Build binary
+        uses: houseabsolute/actions-rust-cross@v0
+        with:
+          command: ${{ matrix.platform.command }}
+          target: ${{ matrix.platform.target }}
+          args: "--locked --release"
+          strip: true
+      - name: Package as archives
         id: zip
         shell: bash
         run: |
-          FILEPATH=target/${{ matrix.target }}/release/cargo-cyclonedx
-          FILENAME=cargo-cyclonedx-${{ matrix.name }}
-          ZIPFILE="$FILENAME.tar.gz"
-          mv "$FILEPATH" "$FILENAME"
-          tar cvfz $ZIPFILE $FILENAME
-          if [[ ${{ matrix.name }} == *"win"* ]]; then
-            ZIPFILE="$FILENAME.zip"
-            mv $FILENAME "$FILENAME.exe"
-            zip $ZIPFILE "$FILENAME.exe"
+          cd target/${{ matrix.platform.target }}/release
+          if [[ "${{ matrix.platform.os }}" == "windows-latest" ]]; then
+            7z a ../../../${{ matrix.platform.name }} ${{ matrix.platform.bin }}
+          else
+            tar czvf ../../../${{ matrix.platform.name }} ${{ matrix.platform.bin }}
           fi
-          echo "ARTIFACT=$ZIPFILE" >> $GITHUB_OUTPUT
+          cd -
+          shasum -a 256 ${{ matrix.platform.name }}
           ls -lh
       - uses: actions/upload-artifact@v3
         with:
-          name: ${{ steps.zip.outputs.ARTIFACT }}
-          path: ${{ steps.zip.outputs.ARTIFACT }}
+          name: cyclonedx-${{ matrix.platform.os_name }}
+          path: "cyclonedx-*"
 
   release:
     needs: [deploy, build-prod]
