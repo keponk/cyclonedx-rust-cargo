@@ -93,8 +93,8 @@ jobs:
           if [[ ${{ matrix.name }} == *"win"* ]]; then
             ZIPFILE="$FILENAME.zip"
             mv $FILENAME "$FILENAME.exe"
-            FILENAME="$FILENAME.exe"
-            zip $ZIPFILE $FILENAME
+            zip $ZIPFILE "$FILENAME.exe"
+          fi
           echo "ARTIFACT=$ZIPFILE" >> $GITHUB_OUTPUT
           ls -lh
       - uses: actions/upload-artifact@v3
