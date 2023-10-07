@@ -50,56 +50,52 @@ jobs:
     strategy:
       matrix:
         platform:
-          - release_for: Linux-x86_64
-            os: ubuntu-20.04
-            target: x86_64-unknown-linux-musl
-            bin: cargo-cyclonedx
-            name: cargo-cyclonedx-Linux-x86_64-musl.tar.gz
+          # - release_for: Linux-x86_64
+          #   os: ubuntu-20.04
+          #   target: x86_64-unknown-linux-musl
+          #   bin: cargo-cyclonedx
+          #   name: cargo-cyclonedx-Linux-x86_64-musl.tar.gz
 
           - release_for: Windows-x86_64
             os: windows-latest
             target: x86_64-pc-windows-msvc
             bin: cargo-cyclonedx.exe
             name: cargo-cyclonedx-Windows-x86_64.zip
-            command: both
 
-          - release_for: macOS-aarch64
-            os: macOS-latest
-            target: aarch64-apple-darwin
-            bin: cargo-cyclonedx
-            name: cargo-cyclonedx-Darwin-aarch64.tar.gz
-            skip_tests: true
+        # - release_for: macOS-aarch64
+        #   os: macOS-latest
+        #   target: aarch64-apple-darwin
+        #   bin: cargo-cyclonedx
+        #   name: cargo-cyclonedx-Darwin-aarch64.tar.gz
 
-          - release_for: macOS-x86_64
-            os: macOS-latest
-            target: x86_64-apple-darwin
-            bin: cargo-cyclonedx
-            name: cargo-cyclonedx-Darwin-x86_64.tar.gz
-            command: both
+        # - release_for: macOS-x86_64
+        #   os: macOS-latest
+        #   target: x86_64-apple-darwin
+        #   bin: cargo-cyclonedx
+        #   name: cargo-cyclonedx-Darwin-x86_64.tar.gz
+
     runs-on: ${{ matrix.platform.os }}
     needs: deploy
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Checkout latest release tag
+      - name: Checkout release tag
         run: |
           echo "${{ needs.deploy.outputs.TAG_NAME }}"
           git checkout ${{ needs.deploy.outputs.TAG_NAME }}
           git status
-      - name: Setup Cache
-        uses: Swatinem/rust-cache@v2
+      - uses: Swatinem/rust-cache@v2
       - name: Install musl-tools on Linux
         run: sudo apt-get update --yes && sudo apt-get install --yes musl-tools
         if: contains(matrix.platform.name, 'musl')
-      - name: Build binary
+      - name: Build release binaries
         uses: houseabsolute/actions-rust-cross@v0
         with:
-          command: ${{ matrix.platform.command }}
+          command: build
           target: ${{ matrix.platform.target }}
-          args: "--locked --release"
+          args: "--release"
           strip: true
       - name: Package as archives
         id: zip
