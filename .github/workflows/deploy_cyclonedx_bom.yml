@@ -72,7 +72,7 @@ jobs:
             target: aarch64-apple-darwin
             bin: cargo-cyclonedx
             zip: cargo-cyclonedx-Darwin-aarch64.tar.gz
-    runs-on: ${{ matrix.platform.os }}
+    runs-on: ${{ matrix.platform.runner }}
     steps:
       - uses: actions/checkout@v4
         with:
