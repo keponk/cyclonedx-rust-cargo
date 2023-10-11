@@ -46,7 +46,7 @@ jobs:
           git push --follow-tags
 
   build-prod:
-    name: Build prod - ${{ matrix.platform.name }}
+    name: Build prod - ${{ matrix.name }}
     needs: deploy
     strategy:
       fail-fast: false
@@ -57,11 +57,11 @@ jobs:
             target: x86_64-unknown-linux-gnu
             bin: cargo-cyclonedx
             zip: cargo-cyclonedx-linux-amd64.tar.gz
-          - name: win-amd64
-            runner: windows-latest
-            target: x86_64-pc-windows-msvc
-            bin: cargo-cyclonedx.exe
-            zip: cargo-cyclonedx-Win-x86_64.zip
+          # - name: win-amd64
+          #   runner: windows-latest
+          #   target: x86_64-pc-windows-msvc
+          #   bin: cargo-cyclonedx.exe
+          #   zip: cargo-cyclonedx-Win-x86_64.zip
           - name: macos-amd64
             runner: macos-latest
             target: x86_64-apple-darwin
@@ -87,9 +87,9 @@ jobs:
         with:
           targets: "${{ matrix.target }}"
       - uses: Swatinem/rust-cache@v2
-      - name: Build release binaries
+      - name: Build ${{ matrix.name }} binary
         run: cargo build --verbose --locked --release --target ${{ matrix.target }}
-      - name: Package as archives
+      - name: Package as archive
         id: zip
         shell: bash
         run: |
@@ -102,7 +102,7 @@ jobs:
             tar czvf ../../../out/${{ matrix.zip }}.tar.gz ${{ matrix.bin }}
           fi
           cd -
-          shasum -a 256 ${{ matrix.name }} > out/${{ matrix.zip }}.sha256
+          shasum -a 256 ${{ matrix.zip }} > out/${{ matrix.zip }}.sha256
           ls -lh out
       - uses: actions/upload-artifact@v3
         with:
