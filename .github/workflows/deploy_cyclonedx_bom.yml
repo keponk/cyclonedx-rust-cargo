@@ -48,31 +48,29 @@ jobs:
   build-prod:
     name: Build prod - ${{ matrix.platform.release_for }}
     strategy:
+      fail-fast: false
       matrix:
-        platform:
-          - release_for: Linux-x86_64
-            os: ubuntu-20.04
-            target: x86_64-unknown-linux-musl
+        include:
+          - name: linux-amd64
+            runner: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
             bin: cargo-cyclonedx
-            name: cargo-cyclonedx-Linux-x86_64-musl.tar.gz
-
-            # - release_for: Windows-x86_64
-            #   os: windows-latest
-            #   target: x86_64-pc-windows-msvc
-            #   bin: cargo-cyclonedx.exe
-            #   name: cargo-cyclonedx-Windows-x86_64.zip
-            #
-          # - release_for: macOS-aarch64
-          #   os: macOS-latest
-          #   target: aarch64-apple-darwin
-          #   bin: cargo-cyclonedx
-          #   name: cargo-cyclonedx-Darwin-aarch64.tar.gz
-
-          - release_for: macOS-x86_64
-            os: macOS-latest
+            zip: cargo-cyclonedx-linux-amd64.tar.gz
+          - name: win-amd64
+            runner: windows-latest
+            target: x86_64-pc-windows-msvc
+            bin: cargo-cyclonedx.exe
+            zip: cargo-cyclonedx-Win-x86_64.zip
+          - name: macos-amd64
+            runner: macos-latest
             target: x86_64-apple-darwin
             bin: cargo-cyclonedx
-            name: cargo-cyclonedx-Darwin-x86_64.tar.gz
+            zip: cargo-cyclonedx-Darwin-x86_64.tar.gz
+          - name: macos-aarch64
+            runner: macos-latest
+            target: aarch64-apple-darwin
+            bin: cargo-cyclonedx
+            zip: cargo-cyclonedx-Darwin-aarch64.tar.gz
 
     runs-on: ${{ matrix.platform.os }}
     needs: deploy
@@ -86,43 +84,37 @@ jobs:
           echo "${{ needs.deploy.outputs.TAG_NAME }}"
           git checkout ${{ needs.deploy.outputs.TAG_NAME }}
           git status
-      - uses: Swatinem/rust-cache@v2
-      - name: Install musl-tools on Linux
-        run: sudo apt-get update --yes && sudo apt-get install --yes musl-tools
-        if: contains(matrix.platform.name, 'musl')
-      - name: Build release binaries
-        uses: houseabsolute/actions-rust-cross@v0
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
         with:
-          command: build
-          target: ${{ matrix.platform.target }}
-          args: "--release"
-          strip: true
+          targets: "${{ matrix.target }}"
+      - uses: Swatinem/rust-cache@v2
+      - name: Build release binaries
+        run: cargo build --verbose --locked --release --target ${{ matrix.target }}
       - name: Package as archives
         id: zip
         shell: bash
         run: |
+          mkdir out
           cd target/${{ matrix.platform.target }}/release
           if [[ "${{ matrix.platform.os }}" == "windows-latest" ]]; then
-            7z a ../../../${{ matrix.platform.name }} ${{ matrix.platform.bin }}
+            mv cargo-cyclonedx ${{ matrix.platform.bin }}
+            7z a ../../../out/${{ matrix.platform.zip }}.zip ${{ matrix.platform.bin }}
           else
-            tar czvf ../../../${{ matrix.platform.name }} ${{ matrix.platform.bin }}
+            tar czvf ../../../out/${{ matrix.platform.zip }}.tar.gz ${{ matrix.platform.bin }}
           fi
           cd -
-          shasum -a 256 ${{ matrix.platform.name }}
-          ls -lh
+          shasum -a 256 ${{ matrix.platform.name }} > out/${{ matrix.platform.zip }}.sha256
+          ls -lh out
       - uses: actions/upload-artifact@v3
         with:
           name: cyclonedx-${{ matrix.platform.os_name }}
-          path: "cyclonedx-*"
+          path: "out/*"
 
   release:
     needs: [deploy, build-prod]
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
       - name: Download artifacts
         uses: actions/download-artifact@v3
         with:
