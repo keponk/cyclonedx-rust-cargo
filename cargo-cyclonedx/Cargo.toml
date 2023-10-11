@@ -33,10 +33,6 @@ serde = { version = "1.0.188", features = ["derive"] }
 thiserror = "1.0.48"
 toml = "0.7.6"
 validator = { version = "0.16.1" }
-openssl = { version = "0.10", features = ["vendored"] }
-
-[features]
-vendored-openssl = ["openssl/vendored"]
 
 [dev-dependencies]
 assert_cmd = "2.0.12"
