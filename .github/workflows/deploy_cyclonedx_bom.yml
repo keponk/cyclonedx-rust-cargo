@@ -106,7 +106,7 @@ jobs:
           ls -lh out
       - uses: actions/upload-artifact@v3
         with:
-          name: cyclonedx-${{ matrix.platform.os_name }}
+          name: cyclonedx-${{ matrix.platform.target }}
           path: "out/*"
 
   release:
