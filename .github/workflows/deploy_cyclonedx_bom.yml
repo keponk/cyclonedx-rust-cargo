@@ -50,29 +50,29 @@ jobs:
     strategy:
       matrix:
         platform:
-          # - release_for: Linux-x86_64
-          #   os: ubuntu-20.04
-          #   target: x86_64-unknown-linux-musl
+          - release_for: Linux-x86_64
+            os: ubuntu-20.04
+            target: x86_64-unknown-linux-musl
+            bin: cargo-cyclonedx
+            name: cargo-cyclonedx-Linux-x86_64-musl.tar.gz
+
+            # - release_for: Windows-x86_64
+            #   os: windows-latest
+            #   target: x86_64-pc-windows-msvc
+            #   bin: cargo-cyclonedx.exe
+            #   name: cargo-cyclonedx-Windows-x86_64.zip
+            #
+          # - release_for: macOS-aarch64
+          #   os: macOS-latest
+          #   target: aarch64-apple-darwin
           #   bin: cargo-cyclonedx
-          #   name: cargo-cyclonedx-Linux-x86_64-musl.tar.gz
+          #   name: cargo-cyclonedx-Darwin-aarch64.tar.gz
 
-          - release_for: Windows-x86_64
-            os: windows-latest
-            target: x86_64-pc-windows-msvc
-            bin: cargo-cyclonedx.exe
-            name: cargo-cyclonedx-Windows-x86_64.zip
-
-        # - release_for: macOS-aarch64
-        #   os: macOS-latest
-        #   target: aarch64-apple-darwin
-        #   bin: cargo-cyclonedx
-        #   name: cargo-cyclonedx-Darwin-aarch64.tar.gz
-
-        # - release_for: macOS-x86_64
-        #   os: macOS-latest
-        #   target: x86_64-apple-darwin
-        #   bin: cargo-cyclonedx
-        #   name: cargo-cyclonedx-Darwin-x86_64.tar.gz
+          - release_for: macOS-x86_64
+            os: macOS-latest
+            target: x86_64-apple-darwin
+            bin: cargo-cyclonedx
+            name: cargo-cyclonedx-Darwin-x86_64.tar.gz
 
     runs-on: ${{ matrix.platform.os }}
     needs: deploy
