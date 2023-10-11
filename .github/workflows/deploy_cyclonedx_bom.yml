@@ -46,7 +46,8 @@ jobs:
           git push --follow-tags
 
   build-prod:
-    name: Build prod - ${{ matrix.platform.release_for }}
+    name: Build prod - ${{ matrix.platform.name }}
+    needs: deploy
     strategy:
       fail-fast: false
       matrix:
@@ -73,8 +74,6 @@ jobs:
             zip: cargo-cyclonedx-Darwin-aarch64.tar.gz
 
     runs-on: ${{ matrix.platform.os }}
-    needs: deploy
-
     steps:
       - uses: actions/checkout@v4
         with:
