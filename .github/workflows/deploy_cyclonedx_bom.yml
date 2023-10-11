@@ -72,7 +72,7 @@ jobs:
             target: aarch64-apple-darwin
             bin: cargo-cyclonedx
             zip: cargo-cyclonedx-Darwin-aarch64.tar.gz
-    runs-on: ${{ matrix.platform.runner }}
+    runs-on: ${{ matrix.runner }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -94,15 +94,15 @@ jobs:
         shell: bash
         run: |
           mkdir out
-          cd target/${{ matrix.platform.target }}/release
-          if [[ "${{ matrix.platform.os }}" == "windows-latest" ]]; then
-            mv cargo-cyclonedx ${{ matrix.platform.bin }}
-            7z a ../../../out/${{ matrix.platform.zip }}.zip ${{ matrix.platform.bin }}
+          cd target/${{ matrix.target }}/release
+          if [[ "${{ matrix.runner }}" == "windows-latest" ]]; then
+            mv cargo-cyclonedx ${{ matrix.bin }}
+            7z a ../../../out/${{ matrix.zip }}.zip ${{ matrix.bin }}
           else
-            tar czvf ../../../out/${{ matrix.platform.zip }}.tar.gz ${{ matrix.platform.bin }}
+            tar czvf ../../../out/${{ matrix.zip }}.tar.gz ${{ matrix.bin }}
           fi
           cd -
-          shasum -a 256 ${{ matrix.platform.name }} > out/${{ matrix.platform.zip }}.sha256
+          shasum -a 256 ${{ matrix.name }} > out/${{ matrix.zip }}.sha256
           ls -lh out
       - uses: actions/upload-artifact@v3
         with:
