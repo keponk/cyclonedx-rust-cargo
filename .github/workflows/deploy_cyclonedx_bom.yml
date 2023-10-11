@@ -97,9 +97,9 @@ jobs:
           cd target/${{ matrix.target }}/release
           if [[ "${{ matrix.runner }}" == "windows-latest" ]]; then
             mv cargo-cyclonedx ${{ matrix.bin }}
-            7z a ../../../out/${{ matrix.zip }}.zip ${{ matrix.bin }}
+            7z a ../../../out/${{ matrix.zip }} ${{ matrix.bin }}
           else
-            tar czvf ../../../out/${{ matrix.zip }}.tar.gz ${{ matrix.bin }}
+            tar czvf ../../../out/${{ matrix.zip }} ${{ matrix.bin }}
           fi
           cd -
           shasum -a 256 out/${{ matrix.zip }} > out/${{ matrix.zip }}.sha256
