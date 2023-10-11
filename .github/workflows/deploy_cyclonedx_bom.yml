@@ -43,7 +43,7 @@ jobs:
           git config --local user.name "github-actions[bot]"
           git commit -am "New development bump of cyclonedx-bom to ${{steps.version.outputs.CARGO_VERSION}}"
           git tag -a ${{ steps.version.outputs.TAG_NAME }} -m "cyclonedx-bom ${{ steps.version.outputs.CARGO_VERSION }} release"
-          git push --follow-tags
+          # git push --follow-tags
 
   build-prod:
     name: Build prod - ${{ matrix.name }}
@@ -102,7 +102,7 @@ jobs:
             tar czvf ../../../out/${{ matrix.zip }}.tar.gz ${{ matrix.bin }}
           fi
           cd -
-          shasum -a 256 ${{ matrix.zip }} > out/${{ matrix.zip }}.sha256
+          shasum -a 256 out/${{ matrix.zip }} > out/${{ matrix.zip }}.sha256
           ls -lh out
       - uses: actions/upload-artifact@v3
         with:
