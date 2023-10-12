@@ -89,7 +89,7 @@ jobs:
       - uses: Swatinem/rust-cache@v2
       - name: Build ${{ matrix.name }} binary
         run: |
-          [[ ${{ matrix.name == "macos-aarch64" }} ]] && brew install openssl
+          [[ ${{ matrix.name }} == "macos-aarch64" ]] && brew install openssl
           cargo build --verbose --locked --release --target ${{ matrix.target }}
       - name: Package as archive
         id: zip
