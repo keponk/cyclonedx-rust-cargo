@@ -106,8 +106,10 @@ jobs:
           else
             tar czvf ../../../out/${{ matrix.zip }} ${{ matrix.bin }}
           fi
+          ls -lh
           cd -
           shasum -a 256 out/${{ matrix.zip }} > out/${{ matrix.zip }}.sha256
+          ls -lh out/
 
       - uses: actions/upload-artifact@v3
         with:
@@ -127,12 +129,13 @@ jobs:
         run: |
           mkdir dist
           find artifacts -type f -exec mv {} dist \;
+          ls -lh dist/
 
-      - name: Release
-        uses: softprops/action-gh-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          name: "cyclonedx-bom-${{ needs.deploy.outputs.TAG_NAME }}"
-          tag_name: ${{ needs.deploy.outputs.TAG_NAME }}
-          files: "dist/*"
+    # - name: Release
+    #   uses: softprops/action-gh-release@v1
+    #   env:
+    #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    #   with:
+    #     name: "cyclonedx-bom-${{ needs.deploy.outputs.TAG_NAME }}"
+    #     tag_name: ${{ needs.deploy.outputs.TAG_NAME }}
+    #     files: "dist/*"
