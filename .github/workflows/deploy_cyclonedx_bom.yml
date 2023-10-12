@@ -40,16 +40,16 @@ jobs:
       - name: Build one time, for sanity
         run: cargo build
 
-      - name: Publish
-        run: cargo publish --token ${{ secrets.CARGO_API_KEY }} --package cyclonedx-bom --verbose --allow-dirty
+    # - name: Publish
+    #   run: cargo publish --token ${{ secrets.CARGO_API_KEY }} --package cyclonedx-bom --verbose --allow-dirty
 
-      - name: Configure git and add files
-        run: |
-          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "github-actions[bot]"
-          git commit -am "New development bump of cyclonedx-bom to ${{steps.version.outputs.CARGO_VERSION}}"
-          git tag -a ${{ steps.version.outputs.TAG_NAME }} -m "cyclonedx-bom ${{ steps.version.outputs.CARGO_VERSION }} release"
-          git push --follow-tags
+    # - name: Configure git and add files
+    #   run: |
+    #     git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+    #     git config --local user.name "github-actions[bot]"
+    #     git commit -am "New development bump of cyclonedx-bom to ${{steps.version.outputs.CARGO_VERSION}}"
+    #     git tag -a ${{ steps.version.outputs.TAG_NAME }} -m "cyclonedx-bom ${{ steps.version.outputs.CARGO_VERSION }} release"
+    #     git push --follow-tags
 
   build-prod:
     name: Build prod - ${{ matrix.name }}
