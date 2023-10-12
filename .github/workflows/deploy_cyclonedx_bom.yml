@@ -67,11 +67,6 @@ jobs:
             target: x86_64-apple-darwin
             bin: cargo-cyclonedx
             zip: cargo-cyclonedx-Darwin-x86_64.tar.gz
-          - name: macos-aarch64
-            runner: macos-latest
-            target: aarch64-apple-darwin
-            bin: cargo-cyclonedx
-            zip: cargo-cyclonedx-Darwin-aarch64.tar.gz
     runs-on: ${{ matrix.runner }}
     steps:
       - uses: actions/checkout@v4
@@ -88,9 +83,7 @@ jobs:
           targets: "${{ matrix.target }}"
       - uses: Swatinem/rust-cache@v2
       - name: Build ${{ matrix.name }} binary
-        run: |
-          [[ ${{ matrix.name }} == "macos-aarch64" ]] && brew install openssl
-          cargo build --verbose --locked --release --target ${{ matrix.target }}
+        run: cargo build --verbose --locked --release --target ${{ matrix.target }}
       - name: Package as archive
         id: zip
         shell: bash
