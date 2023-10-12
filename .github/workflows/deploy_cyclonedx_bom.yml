@@ -13,19 +13,22 @@ jobs:
       TAG_NAME: ${{ steps.version.outputs.TAG_NAME }}
     steps:
       - name: JQ
-        run: |
-          sudo apt-get install -y jq
+        run: sudo apt-get install -y jq
+
       - uses: actions/checkout@v3
+
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
           override: true
-      - name: Setup Cache
-        uses: Swatinem/rust-cache@v2
+
+      - uses: Swatinem/rust-cache@v2
+
       - name: Cargo bump
         run: |
           cargo install cargo-edit
           cargo set-version --package cyclonedx-bom --bump ${{ github.event.inputs.releaseType }}
+
       - name: Set new version and tag name
         id: version
         run: |
@@ -33,17 +36,20 @@ jobs:
           echo "CARGO_VERSION=$CARGO_VERSION" >> $GITHUB_OUTPUT
           TAG_NAME=cyclonedx-bom-$CARGO_VERSION
           echo "TAG_NAME=$TAG_NAME" >> $GITHUB_OUTPUT
+
       - name: Build one time, for sanity
         run: cargo build
-      # - name: Publish
-      #   run: cargo publish --token ${{ secrets.CARGO_API_KEY }} --package cyclonedx-bom --verbose --allow-dirty
+
+      - name: Publish
+        run: cargo publish --token ${{ secrets.CARGO_API_KEY }} --package cyclonedx-bom --verbose --allow-dirty
+
       - name: Configure git and add files
         run: |
           git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
           git commit -am "New development bump of cyclonedx-bom to ${{steps.version.outputs.CARGO_VERSION}}"
           git tag -a ${{ steps.version.outputs.TAG_NAME }} -m "cyclonedx-bom ${{ steps.version.outputs.CARGO_VERSION }} release"
-          # git push --follow-tags
+          git push --follow-tags
 
   build-prod:
     name: Build prod - ${{ matrix.name }}
@@ -72,20 +78,24 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      # - name: Checkout release tag
-      #   run: |
-      #     echo "${{ needs.deploy.outputs.TAG_NAME }}"
-      #     git checkout ${{ needs.deploy.outputs.TAG_NAME }}
-      #     git status
+
+      - name: Checkout release tag
+        run: |
+          echo "${{ needs.deploy.outputs.TAG_NAME }}"
+          git checkout ${{ needs.deploy.outputs.TAG_NAME }}
+          git status
+
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
         with:
           targets: "${{ matrix.target }}"
+
       - uses: Swatinem/rust-cache@v2
+
       - name: Build ${{ matrix.name }} binary
         run: cargo build --verbose --locked --release --target ${{ matrix.target }}
+
       - name: Package as archive
-        id: zip
         shell: bash
         run: |
           mkdir out
@@ -98,7 +108,7 @@ jobs:
           fi
           cd -
           shasum -a 256 out/${{ matrix.zip }} > out/${{ matrix.zip }}.sha256
-          ls -lh out
+
       - uses: actions/upload-artifact@v3
         with:
           name: cyclonedx-${{ matrix.platform.target }}
@@ -112,11 +122,12 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           path: artifacts
+
       - name: Review and move artifacts
         run: |
           mkdir dist
           find artifacts -type f -exec mv {} dist \;
-          ls -lh dist
+
       - name: Release
         uses: softprops/action-gh-release@v1
         env:
