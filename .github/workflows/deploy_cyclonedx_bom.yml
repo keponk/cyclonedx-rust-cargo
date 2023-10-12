@@ -79,11 +79,11 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Checkout release tag
-        run: |
-          echo "${{ needs.deploy.outputs.TAG_NAME }}"
-          git checkout ${{ needs.deploy.outputs.TAG_NAME }}
-          git status
+      # - name: Checkout release tag
+      #   run: |
+      #     echo "${{ needs.deploy.outputs.TAG_NAME }}"
+      #     git checkout ${{ needs.deploy.outputs.TAG_NAME }}
+      #     git status
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
