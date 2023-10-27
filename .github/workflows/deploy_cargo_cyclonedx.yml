@@ -105,7 +105,7 @@ jobs:
             tar czvf ../../../out/${{ matrix.zip }} ${{ matrix.bin }}
           fi
           cd -
-          shasum -a 256 out/${{ matrix.zip }} > out/${{ matrix.zip }}.sha256
+          # shasum -a 256 out/${{ matrix.zip }} > out/${{ matrix.zip }}.sha256
 
       - uses: actions/upload-artifact@v3
         with:
@@ -125,6 +125,10 @@ jobs:
         run: |
           mkdir dist
           find artifacts -type f -exec mv {} dist \;
+          for file in dist/*; do
+            shasum "$file" > "${file}.shasum"
+          done
+          ls
 
       - name: Release
         uses: softprops/action-gh-release@v1
