@@ -100,7 +100,6 @@ jobs:
           mkdir out
           cd target/${{ matrix.target }}/release
           if [[ "${{ matrix.runner }}" == "windows-latest" ]]; then
-            mv cargo-cyclonedx ${{ matrix.bin }}
             7z a ../../../out/${{ matrix.zip }} ${{ matrix.bin }}
           else
             tar czvf ../../../out/${{ matrix.zip }} ${{ matrix.bin }}
