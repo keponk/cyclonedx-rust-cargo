@@ -104,8 +104,6 @@ jobs:
           else
             tar czvf ../../../out/${{ matrix.zip }} ${{ matrix.bin }}
           fi
-          cd -
-          # shasum -a 256 out/${{ matrix.zip }} > out/${{ matrix.zip }}.sha256
 
       - uses: actions/upload-artifact@v3
         with:
