@@ -11,6 +11,8 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    outputs:
+      TAG_NAME: ${{ steps.version.outputs.TAG_NAME }}
     steps:
       - name: JQ
         run: |
@@ -124,9 +126,9 @@ jobs:
           mkdir dist
           find artifacts -type f -exec mv {} dist \;
           for file in dist/*; do
-            shasum "$file" > "${file}.shasum"
+            sha256sum "$file" > "${file}.shasum"
           done
-          ls
+          ls -l dist
 
       - name: Release
         uses: softprops/action-gh-release@v1
